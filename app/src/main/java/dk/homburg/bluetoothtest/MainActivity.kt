@@ -17,10 +17,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import dk.homburg.bluetoothtest.ui.TheAdapter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.list_item.*
 import timber.log.Timber
 import java.util.*
 
@@ -40,30 +39,35 @@ class MainActivity : AppCompatActivity() {
     val runnable = { Timber.d("Tick"); log("Tick", "tock"); scheduleReload() }
 
     val logAdapter = TheAdapter<LogItem>(R.layout.list_item) { item, view ->
-        with(view) {
-            logDate?.text = item.date
-            logTag?.text = item.tag
-            logMessage?.text = item.message
-        }
+            (view.findViewById(R.id.logDate) as TextView).text = item.date
+            // logTag?.text = item.tag
+            // logMessage?.text = item.message
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.d("On create");
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        bottomBar.setOnTabSelectListener {
-            when (it) {
-                R.id.tab_devices -> switchFragment("Devices", DevicesFragment::class.java)
-                else -> switchFragment("Log", LogFragment::class.java)
-            }
-        }
+        // bottomBar.setOnTabSelectListener {
+        //     when (it) {
+        //         R.id.tab_devices -> switchFragment("Devices", DevicesFragment::class.java)
+        //         else -> switchFragment("Log", LogFragment::class.java)
+        //     }
+        // }
 
-        log("MainActivity", "onCreate")
+        // log("MainActivity", "onCreate")
 
-        title = "Log"
+        // title = "Log"
 
         registerReceiver(discoveryReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
+
+        // if (false && savedInstanceState == null) {
+        //     supportFragmentManager.beginTransaction()
+        //     .add(TestFragment(), "")
+        //     .commit()
+        // }
     }
 
     private fun switchFragment(newTitle: String, fragmentClass: Class<out Fragment>) {

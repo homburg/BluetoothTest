@@ -19,7 +19,7 @@ class TheAdapter<T>(@LayoutRes val itemLayout: Int, val binder: (T, View) -> Uni
         return ViewHolder(LayoutInflater.from(parent.context).inflate(itemLayout, parent, false))
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount(): Int = items.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(items[position])
