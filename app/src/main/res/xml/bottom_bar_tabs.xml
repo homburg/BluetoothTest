@@ -1,0 +1,10 @@
+<tabs>
+    <tab
+        icon="@drawable/ic_receipt_black_24dp"
+        id="@+id/tab_log"
+        title="Log" />
+    <tab
+        icon="@drawable/ic_videogame_asset_black_24dp"
+        id="@+id/tab_devices"
+        title="Devices" />
+</tabs>
