@@ -12,6 +12,7 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
 import android.os.Bundle
 import android.os.Handler
+import android.support.annotation.IdRes
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -20,8 +21,10 @@ import android.view.Menu
 import android.view.MenuItem
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
+import kotlinx.android.synthetic.main.content_main.*
 import nz.bradcampbell.paperparcel.PaperParcel
 import nz.bradcampbell.paperparcel.PaperParcelable
+import org.jetbrains.anko.intentFor
 import timber.log.Timber
 import java.util.*
 
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     data class LogItem(val date: String, val tag: String, val message: String)
 
     @PaperParcel
-    data class State(val logList: List<LogItem>, val devices: Map<String, BTDevice>) : PaperParcelable {
+    data class State(val logList: List<LogItem>, val devices: Map<String, BTDevice>, val fragmentIdStack: List<Int>) : PaperParcelable {
         companion object {
             @JvmField val CREATOR = PaperParcelable.Creator(State::class.java)
         }
@@ -40,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             get() = devices.values.sortedBy { it.address }
     }
 
-    var state = State(emptyList<LogItem>(), emptyMap<String, BTDevice>())
+    var state = State(emptyList<LogItem>(), emptyMap<String, BTDevice>(), emptyList())
 
     private var logItems = emptyList<LogItem>()
         set(value) {
@@ -61,7 +64,16 @@ class MainActivity : AppCompatActivity() {
 
     val logAdapter = TheAdapter(R.layout.list_item, ::LogViewHolder)
 
-    val deviceAdapter = TheAdapter(R.layout.list_item_bt_device, ::DevicesViewHolder)
+    val deviceAdapter = TheAdapter(R.layout.list_item_bt_device) {
+        DevicesViewHolder(it) {
+            this@MainActivity.onBTDeviceSelected(it)
+        }
+    }
+
+    private fun onBTDeviceSelected(btDevice: BTDevice) {
+        Timber.d("Selected device: %s", btDevice)
+        startActivity(intentFor<BTDeviceActivity>("device" to btDevice))
+    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -87,25 +99,58 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(discoveryReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
-        (findViewById(R.id.bottomBar) as BottomBar).setOnTabSelectListener {
-            when (it) {
-                R.id.tab_devices -> switchFragment("Devices", DevicesFragment::class.java)
-                else -> switchFragment("Log", LogFragment::class.java)
+        val bottomBar = findViewById(R.id.bottomBar) as BottomBar
+        bottomBar.setOnTabSelectListener {
+            if (state.fragmentIdStack.lastOrNull() != it) {
+                this.pushFragment(it)
             }
         }
 
         if (savedInstanceState == null) {
             logAdapter.items = emptyList()
+            state = state.copy(fragmentIdStack = state.fragmentIdStack + R.id.tab_log)
             supportFragmentManager.beginTransaction()
-            .add(R.id.fragment, LogFragment())
-            .commit()
+                    .add(R.id.fragment, LogFragment())
+                    .commit()
+        }
+    }
+
+    private fun switchFragment(@IdRes id: Int) {
+        when (id) {
+            R.id.tab_devices -> switchFragment("Devices", DevicesFragment::class.java)
+            else -> switchFragment("Log", LogFragment::class.java)
+        }
+    }
+
+    private fun pushFragment(@IdRes id: Int) {
+        Timber.d("Pushing %d", id)
+        state = state.copy(fragmentIdStack = state.fragmentIdStack + id)
+        switchFragment(id)
+    }
+
+    private fun popFragment(): Boolean {
+        val end = state.fragmentIdStack.takeLast(2)
+        if (end.size < 2) {
+            return false
+        } else {
+            val previous = end.first()
+            state = state.copy(fragmentIdStack = state.fragmentIdStack.dropLast(1))
+            bottomBar.selectTabWithId(previous)
+            switchFragment(previous)
+            return true
+        }
+    }
+
+    override fun onBackPressed() {
+        Timber.d("Back pressed")
+        if (!popFragment()) {
+            super.onBackPressed()
         }
     }
 
     private fun switchFragment(newTitle: String, fragmentClass: Class<out Fragment>) {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment, fragmentClass.newInstance())
-                .addToBackStack(null)
                 .commit()
         title = newTitle
     }
@@ -240,8 +285,10 @@ class MainActivity : AppCompatActivity() {
 }
 
 @PaperParcel
-data class BTDevice(val name: String, val address: String) {
+data class BTDevice(val name: String, val address: String) : PaperParcelable {
     companion object {
+        @JvmField val CREATOR = PaperParcelable.Creator(BTDevice::class.java)
+
         fun fromBluetoothDevice(device: BluetoothDevice): BTDevice {
             return BTDevice(
                     name = device.name ?: "",
