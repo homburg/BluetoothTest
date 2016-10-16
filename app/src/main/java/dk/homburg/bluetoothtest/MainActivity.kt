@@ -32,13 +32,16 @@ class MainActivity : AppCompatActivity() {
     data class LogItem(val date: String, val tag: String, val message: String)
 
     @PaperParcel
-    data class State(val logList: List<LogItem>, val devices: List<BTDevice>) : PaperParcelable {
+    data class State(val logList: List<LogItem>, val devices: Map<String, BTDevice>) : PaperParcelable {
         companion object {
             @JvmField val CREATOR = PaperParcelable.Creator(State::class.java)
         }
+
+        val deviceList: List<BTDevice>
+            get() = devices.values.sortedBy { it.address }
     }
 
-    var state = State(emptyList<LogItem>(), emptyList<BTDevice>())
+    var state = State(emptyList<LogItem>(), emptyMap<String, BTDevice>())
 
     private var logItems = emptyList<LogItem>()
         set(value) {
@@ -63,8 +66,9 @@ class MainActivity : AppCompatActivity() {
         (view.findViewById(R.id.logMessage) as TextView).text = item.message
     }
 
-    val deviceAdapter = TheAdapter<BTDevice>(R.layout.list_item) { item, view ->
-        (view.findViewById(R.id.logDate) as TextView).text = item.address
+    val deviceAdapter = TheAdapter<BTDevice>(R.layout.list_item_bt_device) { item, view ->
+        (view.findViewById(R.id.deviceAddress) as TextView).text = item.address
+        (view.findViewById(R.id.deviceName) as TextView).text = item.name
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -80,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             state = it.getParcelable<State>("state")
             Timber.d("Got items", state)
             logAdapter.items = state.logList
-            deviceAdapter.items = state.devices
+            deviceAdapter.items = state.deviceList
         }
 
         setSupportActionBar(findViewById(R.id.toolbar) as Toolbar?)
@@ -171,11 +175,13 @@ class MainActivity : AppCompatActivity() {
         log("Discovery", "started ${btAdapter.startDiscovery()}")
     }
 
-    private var devices: List<BTDevice> = emptyList()
-        set(value: List<BTDevice>) {
+    private var devices: Map<String, BTDevice>
+        set(value) {
+            Timber.d("Setting devices: %s", value)
             state = state.copy(devices = value)
-            deviceAdapter.items = value
+            deviceAdapter.items = state.deviceList
         }
+        get() = state.devices
 
     private val discoveryReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -187,9 +193,14 @@ class MainActivity : AppCompatActivity() {
                 // Add the name and address to an array adapter to show in a ListView
                 log("Discovery", "New device: [${device.name}] as (${device.address})")
 
-                devices += BTDevice.fromBluetoothDevice(device)
+                addDevice(device)
             }
         }
+    }
+
+    private fun addDevice(device: BluetoothDevice) {
+        val newDevice = BTDevice.fromBluetoothDevice(device)
+        devices += Pair(newDevice.address, newDevice)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -237,10 +248,13 @@ class MainActivity : AppCompatActivity() {
 }
 
 @PaperParcel
-data class BTDevice(val address: String) {
+data class BTDevice(val name: String, val address: String) {
     companion object {
-        fun fromBluetoothDevice(device: BluetoothDevice) = BTDevice(
-                address = device.address
-        )
+        fun fromBluetoothDevice(device: BluetoothDevice): BTDevice {
+            return BTDevice(
+                    name = device.name ?: "",
+                    address = device.address
+            )
+        }
     }
 }
