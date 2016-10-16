@@ -20,9 +20,10 @@ class DevicesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView = (view.findViewById(R.id.recyclerView) as RecyclerView)
-        recyclerView!!.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
-        // recyclerView.adapter = mainActivity!!.devicesAdapter
+        (view.findViewById(R.id.recyclerView) as RecyclerView).let {
+            it.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
+            it.adapter = mainActivity!!.deviceAdapter
+        }
     }
 
     private var mainActivity: MainActivity? = null
