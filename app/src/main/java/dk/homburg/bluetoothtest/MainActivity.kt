@@ -21,12 +21,30 @@ import android.view.MenuItem
 import android.widget.TextView
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
+import nz.bradcampbell.paperparcel.PaperParcel
+import nz.bradcampbell.paperparcel.PaperParcelable
 import timber.log.Timber
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    @PaperParcel
     data class LogItem(val date: String, val tag: String, val message: String)
+
+    @PaperParcel
+    data class State(val logList: List<LogItem>) : PaperParcelable {
+        companion object {
+            @JvmField val CREATOR = PaperParcelable.Creator(State::class.java)
+        }
+    }
+
+    var state = State(emptyList<LogItem>())
+
+    private var logItems = emptyList<LogItem>()
+        set(value) {
+            state = state.copy(logList = value)
+            this.logAdapter.items = value
+        }
 
     private fun currentDateStr(): String {
         val tz = TimeZone.getTimeZone("UTC")
@@ -45,14 +63,24 @@ class MainActivity : AppCompatActivity() {
         (view.findViewById(R.id.logMessage) as TextView).text = item.message
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Timber.d("Putting", state)
+        outState.putParcelable("state", state)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("On create")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        savedInstanceState?.let {
+            state = it.getParcelable<State>("state")
+            Timber.d("Got items", state)
+            logAdapter.items = state.logList
+        }
+
         setSupportActionBar(findViewById(R.id.toolbar) as Toolbar?)
 
-
-        log("MainActivity", "onCreate")
+        // log("MainActivity", "onCreate")
 
         // title = "Log"
 
@@ -66,9 +94,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            //     supportFragmentManager.beginTransaction()
-            //     .add(TestFragment(), "")
-            //     .commit()
+            logAdapter.items = emptyList()
+            supportFragmentManager.beginTransaction()
+            .add(R.id.fragment, TestFragment())
+            .commit()
         }
     }
 
@@ -180,7 +209,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun log(tag: String, message: String) {
         val list = this.logAdapter.items + LogItem(currentDateStr(), tag, message)
-        this.logAdapter.items = list
+        this.logItems = list
         Timber.d("Items: %s", list)
     }
 
@@ -192,7 +221,4 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(discoveryReceiver)
         super.onDestroy()
     }
-
 }
-
-

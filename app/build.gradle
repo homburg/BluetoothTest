@@ -1,6 +1,10 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+kapt {
+    generateStubs = true
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
@@ -41,8 +45,13 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.4.1'
 
+    compile 'com.github.grandstaish.paperparcel:paperparcel:1.0.0'
+    compile 'com.github.grandstaish.paperparcel:paperparcel-kotlin:1.0.0'
+    kapt 'com.github.grandstaish.paperparcel:compiler:1.0.0'
+
     testCompile 'junit:junit:4.12'
 }
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }

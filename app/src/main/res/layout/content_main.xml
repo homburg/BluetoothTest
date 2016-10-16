@@ -6,11 +6,10 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     >
 
-    <fragment
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:name="dk.homburg.bluetoothtest.LogFragment"
         android:id="@+id/fragment" />
 
     <com.roughike.bottombar.BottomBar
