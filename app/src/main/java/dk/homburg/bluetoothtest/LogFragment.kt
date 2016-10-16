@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_recycler_view.*
-import timber.log.Timber
 
 /**
  * A placeholder fragment containing a simple view.
@@ -26,17 +25,15 @@ class LogFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        Timber.d("Resume...")
+    override fun onPause() {
+        super.onPause()
 
         recyclerView!!.adapter = null
     }
 
 
-    override fun onPause() {
-        super.onPause()
+    override fun onResume() {
+        super.onResume();
 
         recyclerView!!.adapter = this.mainActivity!!.logAdapter
     }
