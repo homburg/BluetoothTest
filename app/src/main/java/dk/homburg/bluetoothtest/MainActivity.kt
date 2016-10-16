@@ -15,12 +15,12 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
-import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import java.util.*
 
@@ -46,10 +46,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("On create");
+        Timber.d("On create")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar?)
 
 
         log("MainActivity", "onCreate")

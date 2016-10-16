@@ -4,25 +4,28 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_recycler_view.*
 
 /**
  * A placeholder fragment containing a simple view.
  */
 class LogFragment : Fragment() {
 
+    private var recyclerView: RecyclerView? = null
+
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater!!.inflate(R.layout.fragment_recycler_view, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
+        this.recyclerView = view.findViewById(R.id.recyclerView) as RecyclerView
+        this.recyclerView!!.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
     }
 
     override fun onPause() {
