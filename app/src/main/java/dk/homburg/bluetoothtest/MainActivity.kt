@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             logAdapter.items = emptyList()
             supportFragmentManager.beginTransaction()
-            .add(R.id.fragment, TestFragment())
+            .add(R.id.fragment, LogFragment())
             .commit()
         }
     }
