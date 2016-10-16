@@ -11,9 +11,9 @@ import android.view.ViewGroup
 import dk.homburg.bluetoothtest.MainActivity
 import dk.homburg.bluetoothtest.R
 
-abstract class RecyclerViewFragment<T> : Fragment() {
+abstract class RecyclerViewFragment<T, Y : TheAdapterViewHolder<T>> : Fragment() {
 
-    abstract fun adapterFromActivity(activity: MainActivity): TheAdapter<T>
+    abstract fun adapterFromActivity(activity: MainActivity): TheAdapter<T, Y>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

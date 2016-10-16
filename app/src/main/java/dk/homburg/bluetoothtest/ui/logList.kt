@@ -8,26 +8,25 @@ import android.view.View
 import android.view.ViewGroup
 import kotlin.properties.Delegates
 
-class TheAdapter<T>(@LayoutRes val itemLayout: Int, val binder: (T, View) -> Unit) : RecyclerView.Adapter<TheAdapter<T>.ViewHolder>(), AutoUpdatableAdapter {
+abstract class TheAdapterViewHolder<in T>(itemView: View?) : RecyclerView.ViewHolder(itemView) {
+    abstract fun bind(item: T)
+}
+
+class TheAdapter<T, Y : TheAdapterViewHolder<T>>(@LayoutRes val itemLayout: Int, val viewHolderInit: (view: View) -> Y) : RecyclerView.Adapter<Y>(), AutoUpdatableAdapter {
 
     var items: List<T> by Delegates.observable(emptyList()) {
         prop, old, new ->
         autoNotify(old, new) { o, n -> o == n }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(itemLayout, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Y {
+        return viewHolderInit(LayoutInflater.from(parent.context).inflate(itemLayout, parent, false))
     }
 
     override fun getItemCount(): Int = items.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: Y, position: Int) {
         holder.bind(items[position])
-    }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        fun bind(content: T) = binder(content, itemView)
     }
 }
 

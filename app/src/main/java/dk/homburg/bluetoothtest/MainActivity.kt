@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.TextView
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
 import nz.bradcampbell.paperparcel.PaperParcel
@@ -60,16 +59,9 @@ class MainActivity : AppCompatActivity() {
     val handler = Handler()
     val runnable = { Timber.d("Tick"); log("Tick", "tock"); scheduleReload() }
 
-    val logAdapter = TheAdapter<LogItem>(R.layout.list_item) { item, view ->
-        (view.findViewById(R.id.logDate) as TextView).text = item.date
-        (view.findViewById(R.id.logTag) as TextView).text = item.tag
-        (view.findViewById(R.id.logMessage) as TextView).text = item.message
-    }
+    val logAdapter = TheAdapter(R.layout.list_item, ::LogViewHolder)
 
-    val deviceAdapter = TheAdapter<BTDevice>(R.layout.list_item_bt_device) { item, view ->
-        (view.findViewById(R.id.deviceAddress) as TextView).text = item.address
-        (view.findViewById(R.id.deviceName) as TextView).text = item.name
-    }
+    val deviceAdapter = TheAdapter(R.layout.list_item_bt_device, ::DevicesViewHolder)
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
