@@ -21,7 +21,6 @@ import android.widget.TextView
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.list_item.*
 import timber.log.Timber
 import java.util.*
 
@@ -42,8 +41,8 @@ class MainActivity : AppCompatActivity() {
 
     val logAdapter = TheAdapter<LogItem>(R.layout.list_item) { item, view ->
         (view.findViewById(R.id.logDate) as TextView).text = item.date
-        logTag?.text = item.tag
-        logMessage?.text = item.message
+        (view.findViewById(R.id.logTag) as TextView).text = item.tag
+        (view.findViewById(R.id.logMessage) as TextView).text = item.message
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
