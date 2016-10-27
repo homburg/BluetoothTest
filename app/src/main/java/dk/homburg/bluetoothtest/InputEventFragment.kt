@@ -5,7 +5,7 @@ import android.widget.TextView
 import dk.homburg.bluetoothtest.ui.RecyclerViewFragment
 import dk.homburg.bluetoothtest.ui.TheAdapterViewHolder
 
-class LogViewHolder(itemView: View) : TheAdapterViewHolder<MainActivity.LogItem>(itemView) {
+class InputEventViewHolder(itemView: View) : TheAdapterViewHolder<InputEventActivity.InputEvent>(itemView) {
 
     private var  logDate: TextView
     private var logTag: TextView
@@ -17,14 +17,13 @@ class LogViewHolder(itemView: View) : TheAdapterViewHolder<MainActivity.LogItem>
         logMessage = itemView.findViewById(R.id.logMessage) as TextView
     }
 
-    override fun bind(item: MainActivity.LogItem) {
-        logTag.text = item.tag
-        logDate.text = item.date
-        logMessage.text = item.message
+    override fun bind(item: InputEventActivity.InputEvent) {
+        logMessage.text = item.event.toString()
     }
 
 }
 
-class LogFragment : RecyclerViewFragment<MainActivity, MainActivity.LogItem, LogViewHolder>() {
-    override fun adapterFromActivity(activity: MainActivity) = activity.logAdapter
+class InputEventFragment : RecyclerViewFragment<InputEventActivity, InputEventActivity.InputEvent, InputEventViewHolder>() {
+    override fun adapterFromActivity(activity: InputEventActivity) = activity.inputEventAdapter
 }
+

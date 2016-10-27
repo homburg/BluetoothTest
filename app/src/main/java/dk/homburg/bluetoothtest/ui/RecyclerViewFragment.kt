@@ -1,5 +1,6 @@
 package dk.homburg.bluetoothtest.ui
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -8,12 +9,11 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import dk.homburg.bluetoothtest.MainActivity
 import dk.homburg.bluetoothtest.R
 
-abstract class RecyclerViewFragment<T, Y : TheAdapterViewHolder<T>> : Fragment() {
+abstract class RecyclerViewFragment<in A : Activity, T, Y : TheAdapterViewHolder<T>> : Fragment() {
 
-    abstract fun adapterFromActivity(activity: MainActivity): TheAdapter<T, Y>
+    abstract fun adapterFromActivity(activity: A): TheAdapter<T, Y>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -28,12 +28,10 @@ abstract class RecyclerViewFragment<T, Y : TheAdapterViewHolder<T>> : Fragment()
         }
     }
 
-    private var mainActivity: MainActivity? = null
+    private var mainActivity: A? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (context is MainActivity) {
-            this.mainActivity = context
-        }
+        this.mainActivity = context as A?
     }
 }

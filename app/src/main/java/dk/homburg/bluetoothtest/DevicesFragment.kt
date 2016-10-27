@@ -22,7 +22,7 @@ class DevicesViewHolder(itemView: View, private val clickListener: (BTDevice) ->
     }
 }
 
-class DevicesFragment : RecyclerViewFragment<BTDevice, DevicesViewHolder>() {
+class DevicesFragment : RecyclerViewFragment<MainActivity, BTDevice, DevicesViewHolder>() {
     override fun adapterFromActivity(activity: MainActivity): TheAdapter<BTDevice, DevicesViewHolder> {
         return activity.deviceAdapter
     }

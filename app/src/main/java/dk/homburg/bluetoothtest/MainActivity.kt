@@ -16,11 +16,11 @@ import android.support.annotation.IdRes
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import com.roughike.bottombar.BottomBar
 import dk.homburg.bluetoothtest.ui.TheAdapter
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import nz.bradcampbell.paperparcel.PaperParcel
 import nz.bradcampbell.paperparcel.PaperParcelable
@@ -50,13 +50,6 @@ class MainActivity : AppCompatActivity() {
             state = state.copy(logList = value)
             this.logAdapter.items = value
         }
-
-    private fun currentDateStr(): String {
-        val tz = TimeZone.getTimeZone("UTC")
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset
-        df.timeZone = tz
-        return df.format(Date())
-    }
 
 
     val handler = Handler()
@@ -91,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             deviceAdapter.items = state.deviceList
         }
 
-        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar?)
+        setSupportActionBar(toolbar)
 
         // log("MainActivity", "onCreate")
 
@@ -168,12 +161,18 @@ class MainActivity : AppCompatActivity() {
         val id = item.itemId
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.discover) {
-            doSomeBluetooth()
-            return true
+        return when (id) {
+            R.id.option_discover -> {
+                doSomeBluetooth()
+                true
+            }
+            R.id.option_input_events -> {
+                startActivity(intentFor<InputEventActivity>())
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
     }
 
     private val REQUEST_ENABLE_BT: Int = 0x20
@@ -193,8 +192,9 @@ class MainActivity : AppCompatActivity() {
 
         val pairedDevices = btAdapter.bondedDevices
         if (pairedDevices.size > 0) {
-            pairedDevices.forEach {
+             devices += pairedDevices.map {
                 log("Paired device", "[${it.name}] as (${it.address})")
+                Pair(it.address, BTDevice.fromBluetoothDevice(it))
             }
         } else {
             log("Paired devices", "none")
@@ -269,7 +269,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun log(tag: String, message: String) {
-        val list = this.logAdapter.items + LogItem(currentDateStr(), tag, message)
+        val list = this.logAdapter.items + LogItem(Companion.currentDateStr(), tag, message)
         this.logItems = list
         Timber.d("Items: %s", list)
     }
@@ -282,17 +282,27 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(discoveryReceiver)
         super.onDestroy()
     }
+
+    companion object {
+        fun currentDateStr(): String {
+            val tz = TimeZone.getTimeZone("UTC")
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset
+            df.timeZone = tz
+            return df.format(Date())
+        }
+    }
 }
 
 @PaperParcel
-data class BTDevice(val name: String, val address: String) : PaperParcelable {
+data class BTDevice(val name: String, val address: String, val device: BluetoothDevice) : PaperParcelable {
     companion object {
         @JvmField val CREATOR = PaperParcelable.Creator(BTDevice::class.java)
 
         fun fromBluetoothDevice(device: BluetoothDevice): BTDevice {
             return BTDevice(
                     name = device.name ?: "",
-                    address = device.address
+                    address = device.address,
+                    device = device
             )
         }
     }

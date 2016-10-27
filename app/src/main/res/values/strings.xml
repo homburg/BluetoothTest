@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">BluetoothTest</string>
     <string name="action_settings">Discover</string>
+    <string name="connect">Connect</string>
+    <string name="capture_input_events">Capture input events</string>
+    <string name="accessibility_service_description">description</string>
 </resources>
